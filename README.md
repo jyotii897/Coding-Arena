@@ -7,18 +7,7 @@ Coding Arena is a web platform where users can solve programming problems and se
 - Solve problems in multiple programming languages
 - Real-time input/output interface
 - Leaderboard and scoring
-- User authentication
-
-## Demo Screenshots
-
-![Problem Solving Interface](./assets/demo.png)
-
-*(Add more demo images as needed: ![](./assets/demo2.png) etc.)*
-
-## Demo Video
-
-- [View Full Demo Video](./assets/demo-video.mp4)
-- *(Or link to YouTube: [Watch on YouTube](https://youtube.com/your-demo-link))* 
+- User authenticatio
 
 ## How To Run
 
