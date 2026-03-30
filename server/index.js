@@ -14,7 +14,39 @@ const languageMap = {
     "java": { language: "java", version: "15.0.2" }
 };
 
-app.post("/compile", (req, res) => {
+const savedFilesDir = process.env.VERCEL ? path.join("/tmp", "saved_files") : path.join(__dirname, "saved_files");
+
+try {
+    if (!fs.existsSync(savedFilesDir)) {
+        fs.mkdirSync(savedFilesDir, { recursive: true });
+        console.log(`'${savedFilesDir}' folder created successfully.`);
+    }
+} catch (err) {
+    console.error("Error creating 'saved_files' folder:", err);
+}
+
+app.post("/api/save", (req, res) => {
+    const { fileName, code } = req.body;
+
+    if (!code) {
+        return res.status(400).send({ error: "Code content is required" });
+    }
+
+    const finalFileName = fileName || `default_${Date.now()}.txt`;
+
+    const filePath = path.join(savedFilesDir, finalFileName);
+
+    fs.writeFile(filePath, code, "utf8", (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send({ error: "Error saving file" });
+        }
+
+        res.send({ message: `File saved successfully as ${finalFileName}` });
+    });
+});
+
+app.post("/api/compile", (req, res) => {
     let code = req.body.code;
     let language = req.body.language;
     let input = req.body.input;
@@ -25,8 +57,8 @@ app.post("/compile", (req, res) => {
     }
 
     let data = {
-        "language": languageMap[language].language,
-        "version": languageMap[language].version,
+        "language": languageMap[normalizedLanguage].language,
+        "version": languageMap[normalizedLanguage].version,
         "files": [
             {
                 "name": "main",
@@ -54,42 +86,12 @@ app.post("/compile", (req, res) => {
         });
 });
 
-
-const fs = require("fs");
-const path = require("path");
-
-const savedFilesDir = path.join(__dirname, "saved_files");
-
-try {
-    if (!fs.existsSync(savedFilesDir)) {
-        fs.mkdirSync(savedFilesDir);
-        console.log("'saved_files' folder created successfully.");
-    }
-} catch (err) {
-    console.error("Error creating 'saved_files' folder:", err);
+// For local testing
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server listening on port ${PORT}`);
+    });
 }
 
-app.post("/save", (req, res) => {
-    const { fileName, code } = req.body;
+module.exports = app;
 
-    if (!code) {
-        return res.status(400).send({ error: "Code content is required" });
-    }
-
-    const finalFileName = fileName || `default_${Date.now()}.txt`;
-
-    const filePath = path.join(savedFilesDir, finalFileName);
-
-    fs.writeFile(filePath, code, "utf8", (err) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send({ error: "Error saving file" });
-        }
-
-        res.send({ message: `File saved successfully as ${finalFileName}` });
-    });
-});
-
-app.listen(process.env.PORT || PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});

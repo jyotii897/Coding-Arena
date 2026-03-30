@@ -76,7 +76,7 @@ function App() {
             return;
         }
 
-        Axios.post(`http://localhost:8000/compile`, {
+        Axios.post(`/api/compile`, {
             code: userCode,
             language: userLang,
             input: userInput
@@ -102,7 +102,7 @@ function App() {
     function saveCode() {
         const fileName = prompt("Enter file name (with extension) or leave empty for default:");
 
-        Axios.post("http://localhost:8000/save", {
+        Axios.post("/api/save", {
             fileName: fileName?.trim() || null,
             code: userCode,
         })
